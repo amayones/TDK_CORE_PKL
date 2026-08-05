@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
 
 class MenuManagementService extends BaseService
 {
@@ -325,12 +326,22 @@ class MenuManagementService extends BaseService
             File::delete($routeFile);
         }
         
-        // Migration file - find any file with create_{table}_table
+        // Migration files - find any file with create_{table}_table
         $migrationFiles = File::glob(database_path("migrations/*create_{$tableName}_table.php"));
         foreach ($migrationFiles as $file) {
             if (File::exists($file)) {
                 File::delete($file);
             }
+        }
+        
+        // Drop table from database if exists
+        try {
+            if (Schema::hasTable($tableName)) {
+                Schema::dropIfExists($tableName);
+                Log::info("Table {$tableName} dropped successfully");
+            }
+        } catch (\Exception $e) {
+            Log::error("Failed to drop table {$tableName}: " . $e->getMessage());
         }
         
         // Remove entry from moduleRegistry.js
