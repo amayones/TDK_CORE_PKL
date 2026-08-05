@@ -3,16 +3,16 @@
 namespace App\Http\Controllers\Modules;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Modules\StoreTesRequest;
-use App\Http\Requests\Modules\UpdateTesRequest;
-use App\Services\Modules\TesService;
+use App\Http\Requests\Modules\StoreTestingRequest;
+use App\Http\Requests\Modules\UpdateTestingRequest;
+use App\Services\Modules\TestingService;
 use Illuminate\Http\Request;
 
-class TesController extends Controller
+class TestingController extends Controller
 {
-    protected TesService $service;
+    protected TestingService $service;
 
-    public function __construct(TesService $service)
+    public function __construct(TestingService $service)
     {
         $this->service = $service;
     }
@@ -34,14 +34,14 @@ class TesController extends Controller
         return $this->success($item, 'Detail berhasil dimuat');
     }
 
-    public function store(StoreTesRequest $request)
+    public function store(StoreTestingRequest $request)
     {
         $item = $this->service->createItem($request->validated());
 
         return $this->success($item, 'Data berhasil dibuat', 201);
     }
 
-    public function update(UpdateTesRequest $request, int $id)
+    public function update(UpdateTestingRequest $request, int $id)
     {
         $item = $this->service->updateItem($id, $request->validated());
 

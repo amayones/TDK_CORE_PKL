@@ -4,7 +4,7 @@ namespace App\Http\Requests\Modules;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class StoreTesRequest extends FormRequest
+class UpdateTestingRequest extends FormRequest
 {
     public function authorize(): bool
     {

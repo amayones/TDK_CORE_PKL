@@ -151,7 +151,8 @@ class MenuManagementService extends BaseService
         $registryPath = resource_path('js/core/moduleRegistry.js');
         if (File::exists($registryPath)) {
             $registryContent = File::get($registryPath);
-            $pattern = "/    '{$moduleKey}': lazy\(\(\) => import\('\.\.\/modules\/{$moduleKey}\/pages\/.*?'\),\n/";
+            // Match both single and double quotes, and optional whitespace
+            $pattern = "/    ['\"]({$moduleKey})['\"]:\\s*lazy\(\(\) => import\(['\"]\.\.\/modules\/{$moduleKey}\/pages\/.*?['\"]\)\),\n/";
             $newRegistryContent = preg_replace($pattern, '', $registryContent);
             if ($newRegistryContent !== $registryContent) {
                 File::put($registryPath, $newRegistryContent);

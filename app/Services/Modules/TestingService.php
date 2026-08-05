@@ -3,31 +3,31 @@
 namespace App\Services\Modules;
 
 use App\Core\BaseService;
-use App\Repositories\TesRepository;
+use App\Repositories\TestingRepository;
 use App\Models\AuditLog;
 
-class TesService extends BaseService
+class TestingService extends BaseService
 {
-    protected TesRepository $tesRepository;
+    protected TestingRepository $testingRepository;
 
-    public function __construct(TesRepository $tesRepository)
+    public function __construct(TestingRepository $testingRepository)
     {
-        parent::__construct($tesRepository);
-        $this->tesRepository = $tesRepository;
+        parent::__construct($testingRepository);
+        $this->testingRepository = $testingRepository;
     }
 
     public function list(int $perPage = 15, ?string $search = null)
     {
-        return $this->tesRepository->paginateWithSearch($perPage, $search);
+        return $this->testingRepository->paginateWithSearch($perPage, $search);
     }
 
     public function createItem(array $data)
     {
-        $item = $this->tesRepository->create($data);
+        $item = $this->testingRepository->create($data);
 
         AuditLog::record(
             action: 'CREATE',
-            module: 'tes',
+            module: 'testing',
             description: "Membuat data baru: {$item->name}",
             newData: $item->toArray()
         );
@@ -37,14 +37,14 @@ class TesService extends BaseService
 
     public function updateItem(int $id, array $data)
     {
-        $item = $this->tesRepository->find($id);
+        $item = $this->testingRepository->find($id);
         $oldData = $item->toArray();
 
-        $updated = $this->tesRepository->update($id, $data);
+        $updated = $this->testingRepository->update($id, $data);
 
         AuditLog::record(
             action: 'UPDATE',
-            module: 'tes',
+            module: 'testing',
             description: "Mengubah data: {$updated->name}",
             oldData: $oldData,
             newData: $updated->toArray()
@@ -55,14 +55,14 @@ class TesService extends BaseService
 
     public function deleteItem(int $id)
     {
-        $item = $this->tesRepository->find($id);
+        $item = $this->testingRepository->find($id);
         $oldData = $item->toArray();
 
-        $this->tesRepository->delete($id);
+        $this->testingRepository->delete($id);
 
         AuditLog::record(
             action: 'DELETE',
-            module: 'tes',
+            module: 'testing',
             description: "Menghapus data: {$item->name}",
             oldData: $oldData
         );

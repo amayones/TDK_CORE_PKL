@@ -2,11 +2,11 @@
 
 namespace App\Repositories;
 
-use App\Models\Tes;
+use App\Models\Testing;
 
-class TesRepository extends BaseRepository
+class TestingRepository extends BaseRepository
 {
-    public function __construct(Tes $model)
+    public function __construct(Testing $model)
     {
         parent::__construct($model);
     }
