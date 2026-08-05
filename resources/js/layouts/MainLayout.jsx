@@ -3,6 +3,7 @@ import { useAuth } from '../core/AuthContext';
 import { useSidebar } from '../core/SidebarContext';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
+import Alert from '../components/Alert';
 
 export default function MainLayout({ children }) {
     const { user, logout } = useAuth();
@@ -54,6 +55,9 @@ export default function MainLayout({ children }) {
                 <main className="flex-1 overflow-y-auto p-3 sm:p-6">
                     {children}
                 </main>
+
+                {/* Global Alert Notifications */}
+                <Alert />
             </div>
         </div>
     );
