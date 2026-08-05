@@ -9,6 +9,7 @@ use App\Models\Menu;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Artisan;
 
 class MenuManagementService extends BaseService
 {
@@ -119,6 +120,141 @@ class MenuManagementService extends BaseService
         );
 
         return true;
+    }
+    
+    public function generateModule(string $moduleKey, string $studlyName, string $tableName): void
+    {
+        $camelName = Str::camel($studlyName);
+        $basePath = resource_path("js/modules/{$moduleKey}");
+        
+        // Create frontend directories
+        File::makeDirectory("{$basePath}/pages", 0755, true, true);
+        File::makeDirectory("{$basePath}/components", 0755, true, true);
+        File::makeDirectory("{$basePath}/services", 0755, true, true);
+        
+        // Create frontend files from stubs
+        $serviceContent = str_replace(
+            ['{{studlyName}}', '{{moduleKey}}', '{{tableName}}', '{{camelName}}'],
+            [$studlyName, $moduleKey, $tableName, $camelName],
+            File::get(base_path('stubs/module/frontend-service.stub'))
+        );
+        $pageContent = str_replace(
+            ['{{studlyName}}', '{{moduleKey}}', '{{tableName}}', '{{camelName}}'],
+            [$studlyName, $moduleKey, $tableName, $camelName],
+            File::get(base_path('stubs/module/frontend-page.stub'))
+        );
+        $modalContent = str_replace(
+            ['{{studlyName}}', '{{moduleKey}}', '{{tableName}}', '{{camelName}}'],
+            [$studlyName, $moduleKey, $tableName, $camelName],
+            File::get(base_path('stubs/module/frontend-modal.stub'))
+        );
+        
+        File::put("{$basePath}/services/{$camelName}Service.js", $serviceContent);
+        File::put("{$basePath}/pages/{$studlyName}Page.jsx", $pageContent);
+        File::put("{$basePath}/components/{$studlyName}FormModal.jsx", $modalContent);
+        
+        // Create backend files
+        $backendPath = app_path("Modules/{$studlyName}");
+        File::makeDirectory("{$backendPath}", 0755, true, true);
+        
+        // Migration stub
+        $migrationContent = str_replace(
+            ['{{studlyName}}', '{{tableName}}'],
+            [$studlyName, $tableName],
+            File::get(base_path('stubs/module/migration.stub'))
+        );
+        $timestamp = date('Y_m_d_His');
+        File::put(database_path("migrations/{$timestamp}_create_{$tableName}s_table.php"), $migrationContent);
+        
+        // Model stub
+        $modelContent = str_replace(
+            ['{{studlyName}}', '{{tableName}}'],
+            [$studlyName, $tableName],
+            File::get(base_path('stubs/module/model.stub'))
+        );
+        File::put(app_path("Models/{$studlyName}.php"), $modelContent);
+        
+        // Repository stub
+        $repoContent = str_replace(
+            ['{{studlyName}}', '{{tableName}}'],
+            [$studlyName, $tableName],
+            File::get(base_path('stubs/module/repository.stub'))
+        );
+        File::put(app_path("Repositories/{$studlyName}Repository.php"), $repoContent);
+        
+        // Service stub
+        $serviceContentBackend = str_replace(
+            ['{{studlyName}}', '{{tableName}}', '{{camelName}}'],
+            [$studlyName, $tableName, $camelName],
+            File::get(base_path('stubs/module/service.stub'))
+        );
+        File::put(app_path("Services/Modules/{$studlyName}Service.php"), $serviceContentBackend);
+        
+        // Controller stub
+        $controllerContent = str_replace(
+            ['{{studlyName}}', '{{tableName}}', '{{camelName}}'],
+            [$studlyName, $tableName, $camelName],
+            File::get(base_path('stubs/module/controller.stub'))
+        );
+        File::put(app_path("Http/Controllers/Modules/{$studlyName}Controller.php"), $controllerContent);
+        
+        // Request stubs
+        $storeRequestContent = str_replace(
+            ['{{studlyName}}'],
+            [$studlyName],
+            File::get(base_path('stubs/module/store-request.stub'))
+        );
+        $updateRequestContent = str_replace(
+            ['{{studlyName}}'],
+            [$studlyName],
+            File::get(base_path('stubs/module/update-request.stub'))
+        );
+        File::put(app_path("Http/Requests/Modules/Store{$studlyName}Request.php"), $storeRequestContent);
+        File::put(app_path("Http/Requests/Modules/Update{$studlyName}Request.php"), $updateRequestContent);
+        
+        // Route file
+        $routeContent = str_replace(
+            ['{{studlyName}}', '{{tableName}}', '{{camelName}}'],
+            [$studlyName, $tableName, $camelName],
+            File::get(base_path('stubs/module/route.stub'))
+        );
+        File::put(base_path("routes/modules/{$moduleKey}.php"), $routeContent);
+        
+        // Register in moduleRegistry
+        $this->registerModuleInRegistry($moduleKey, $studlyName);
+    }
+    
+    private function registerModuleInRegistry(string $moduleKey, string $studlyName): void
+    {
+        $registryPath = resource_path('js/core/moduleRegistry.js');
+        if (!File::exists($registryPath)) {
+            return;
+        }
+        
+        $content = File::get($registryPath);
+        
+        // Check if already registered
+        if (Str::contains($content, "'{$moduleKey}'")) {
+            return;
+        }
+        
+        $importLine = "    '{$moduleKey}': lazy(() => import('../modules/{$moduleKey}/pages/{$studlyName}Page')),\n";
+        
+        // Find closing brace of moduleRegistry object
+        $closingPos = strpos($content, '};');
+        if ($closingPos === false) {
+            return;
+        }
+        
+        $beforeClosing = rtrim(substr($content, 0, $closingPos));
+        if (!Str::endsWith($beforeClosing, ',')) {
+            $beforeClosing .= ',';
+        }
+        
+        $afterClosing = substr($content, $closingPos + 2);
+        $newContent = $beforeClosing . "\n" . $importLine . "};" . $afterClosing;
+        
+        File::put($registryPath, $newContent);
     }
     
     private function deleteModuleFiles(string $moduleKey): void

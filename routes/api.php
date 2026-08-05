@@ -68,6 +68,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::middleware('menu.access:menu-management,can_delete')->group(function () {
         Route::delete('/admin/menus/{id}', [MenuManagementController::class, 'destroy']);
     });
+    Route::middleware('menu.access:menu-management,can_create')->group(function () {
+        Route::post('/admin/menus/generate-module', [MenuManagementController::class, 'generateModule']);
+    });
 
     Route::middleware('menu.access:menu-access-management,can_view')->group(function () {
         Route::get('/admin/menu-access/groups', [MenuAccessManagementController::class, 'groups']);

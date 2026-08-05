@@ -58,4 +58,21 @@ class MenuManagementController extends Controller
 
         return $this->success(null, 'Menu berhasil dihapus');
     }
+
+    public function generateModule(Request $request)
+    {
+        $request->validate([
+            'module_key' => 'required|string|alpha_dash|unique:menus,module_key',
+            'studly_name' => 'required|string|alpha',
+            'table_name' => 'required|string|alpha',
+        ]);
+
+        $this->service->generateModule(
+            $request->module_key,
+            $request->studly_name,
+            $request->table_name
+        );
+
+        return $this->success(null, 'Module berhasil dibuat');
+    }
 }
