@@ -12,7 +12,10 @@ function MenuIcon({ name }) {
 
 /**
  * Tooltip yang di-render ke document.body via Portal.
- * Menggunakan position:fixed agar tidak terpotong oleh overflow container sidebar.
+ * - position: fixed agar tidak terpotong overflow container sidebar
+ * - background & text sesuai tema sidebar (bg-blue-700, text-white)
+ * - height mengikuti icon, width menyesuaikan teks
+ * - animasi fade + slide perlahan
  */
 function PortalTooltip({ targetRef, show, children }) {
     const [coords, setCoords] = useState({ top: 0, left: 0 });
@@ -21,8 +24,9 @@ function PortalTooltip({ targetRef, show, children }) {
         if (show && targetRef.current) {
             const rect = targetRef.current.getBoundingClientRect();
             setCoords({
-                top: rect.top + rect.height / 2,
-                left: rect.right + 8,
+                top: rect.top,
+                left: rect.right + 4,
+                height: rect.height,
             });
         }
     }, [show, targetRef]);
@@ -35,9 +39,9 @@ function PortalTooltip({ targetRef, show, children }) {
                 position: 'fixed',
                 top: `${coords.top}px`,
                 left: `${coords.left}px`,
-                transform: 'translateY(-50%)',
+                height: `${coords.height}px`,
             }}
-            className="px-2 py-1 bg-gray-900 text-white text-xs rounded shadow-lg whitespace-nowrap z-[9999] pointer-events-none"
+            className="flex items-center px-3 bg-blue-700 text-white text-sm rounded-md shadow-lg whitespace-nowrap z-[9999] pointer-events-none sidebar-tooltip-enter"
         >
             {children}
         </div>,
@@ -149,16 +153,16 @@ export default function Sidebar({ basePath = '/tdk-core-pkl' }) {
                 collapsed ? 'w-16' : 'w-64'
             }`}
         >
-            {/* Header sidebar: burger toggle + tulisan "Menu" */}
-            <div className="px-2 py-3 border-b border-blue-800 flex items-center gap-2">
+            {/* Header sidebar: tulisan "Menu" + burger toggle di sebelah kanan */}
+            <div className="px-3 py-3 border-b border-blue-800 flex items-center">
+                {!collapsed && <h2 className="text-white font-bold text-lg">Menu</h2>}
                 <button
                     onClick={toggle}
-                    className="text-white hover:text-blue-200 focus:outline-none p-1.5 rounded hover:bg-blue-800 transition-colors shrink-0"
+                    className="text-white hover:text-blue-200 focus:outline-none p-1.5 rounded hover:bg-blue-800 transition-colors shrink-0 ml-auto"
                     aria-label="Toggle sidebar"
                 >
                     {collapsed ? <Icons.Menu size={18} /> : <Icons.PanelLeftClose size={18} />}
                 </button>
-                {!collapsed && <h2 className="text-white font-bold text-lg">Menu</h2>}
             </div>
 
             <div className="flex-1 overflow-y-auto p-2 space-y-1">

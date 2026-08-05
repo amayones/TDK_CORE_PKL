@@ -11,3 +11,19 @@ body {
 #app {
     height: 100%;
 }
+
+/* Animasi tooltip sidebar saat collapsed (muncul perlahan dari kiri) */
+@keyframes sidebar-tooltip-in {
+    from {
+        opacity: 0;
+        transform: translateX(-8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.sidebar-tooltip-enter {
+    animation: sidebar-tooltip-in 0.2s ease-out forwards;
+}
