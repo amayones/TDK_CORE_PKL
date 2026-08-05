@@ -10,6 +10,7 @@ use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Log;
 
 class MenuManagementService extends BaseService
 {
@@ -140,96 +141,137 @@ class MenuManagementService extends BaseService
         File::makeDirectory("{$basePath}/components", 0755, true, true);
         File::makeDirectory("{$basePath}/services", 0755, true, true);
         
-        // Create frontend files from stubs
-        $serviceContent = str_replace(
-            ['{{studlyName}}', '{{moduleKey}}', '{{tableName}}', '{{camelName}}'],
-            [$studlyName, $moduleKey, $tableName, $camelName],
-            File::get(base_path('stubs/module/frontend-service.stub'))
-        );
-        $pageContent = str_replace(
-            ['{{studlyName}}', '{{moduleKey}}', '{{tableName}}', '{{camelName}}'],
-            [$studlyName, $moduleKey, $tableName, $camelName],
-            File::get(base_path('stubs/module/frontend-page.stub'))
-        );
-        $modalContent = str_replace(
-            ['{{studlyName}}', '{{moduleKey}}', '{{tableName}}', '{{camelName}}'],
-            [$studlyName, $moduleKey, $tableName, $camelName],
-            File::get(base_path('stubs/module/frontend-modal.stub'))
-        );
+        $migrationFiles = [];
         
-        File::put("{$basePath}/services/{$camelName}Service.js", $serviceContent);
-        File::put("{$basePath}/pages/{$studlyName}Page.jsx", $pageContent);
-        File::put("{$basePath}/components/{$studlyName}FormModal.jsx", $modalContent);
+        // Create frontend files from stubs
+        $stubFiles = [
+            'frontend-service' => "{$basePath}/services/{$camelName}Service.js",
+            'frontend-page' => "{$basePath}/pages/{$studlyName}Page.jsx",
+            'frontend-modal' => "{$basePath}/components/{$studlyName}FormModal.jsx",
+        ];
+        
+        foreach ($stubFiles as $stubName => $targetPath) {
+            try {
+                $content = str_replace(
+                    ['{{studlyName}}', '{{moduleKey}}', '{{tableName}}', '{{camelName}}'],
+                    [$studlyName, $moduleKey, $tableName, $camelName],
+                    File::get(base_path("stubs/module/{$stubName}.stub"))
+                );
+                File::put($targetPath, $content);
+            } catch (\Exception $e) {
+                throw new \RuntimeException("Gagal membuat file frontend {$targetPath}: " . $e->getMessage());
+            }
+        }
         
         // Create backend files
         $backendPath = app_path("Modules/{$studlyName}");
         File::makeDirectory("{$backendPath}", 0755, true, true);
         
         // Migration stub
-        $migrationContent = str_replace(
-            ['{{studlyName}}', '{{tableName}}'],
-            [$studlyName, $tableName],
-            File::get(base_path('stubs/module/migration.stub'))
-        );
         $timestamp = date('Y_m_d_His');
-        File::put(database_path("migrations/{$timestamp}_create_{$tableName}s_table.php"), $migrationContent);
+        try {
+            $migrationContent = str_replace(
+                ['{{studlyName}}', '{{tableName}}'],
+                [$studlyName, $tableName],
+                File::get(base_path('stubs/module/migration.stub'))
+            );
+            File::put(database_path("migrations/{$timestamp}_create_{$tableName}s_table.php"), $migrationContent);
+        } catch (\Exception $e) {
+            throw new \RuntimeException("Gagal membuat migration: " . $e->getMessage());
+        }
         
         // Model stub
-        $modelContent = str_replace(
-            ['{{studlyName}}', '{{tableName}}'],
-            [$studlyName, $tableName],
-            File::get(base_path('stubs/module/model.stub'))
-        );
-        File::put(app_path("Models/{$studlyName}.php"), $modelContent);
+        try {
+            $modelContent = str_replace(
+                ['{{studlyName}}', '{{tableName}}'],
+                [$studlyName, $tableName],
+                File::get(base_path('stubs/module/model.stub'))
+            );
+            File::put(app_path("Models/{$studlyName}.php"), $modelContent);
+        } catch (\Exception $e) {
+            throw new \RuntimeException("Gagal membuat model: " . $e->getMessage());
+        }
         
         // Repository stub
-        $repoContent = str_replace(
-            ['{{studlyName}}', '{{tableName}}'],
-            [$studlyName, $tableName],
-            File::get(base_path('stubs/module/repository.stub'))
-        );
-        File::put(app_path("Repositories/{$studlyName}Repository.php"), $repoContent);
+        try {
+            $repoContent = str_replace(
+                ['{{studlyName}}', '{{tableName}}'],
+                [$studlyName, $tableName],
+                File::get(base_path('stubs/module/repository.stub'))
+            );
+            File::put(app_path("Repositories/{$studlyName}Repository.php"), $repoContent);
+        } catch (\Exception $e) {
+            throw new \RuntimeException("Gagal membuat repository: " . $e->getMessage());
+        }
         
         // Service stub
-        $serviceContentBackend = str_replace(
-            ['{{studlyName}}', '{{tableName}}', '{{camelName}}'],
-            [$studlyName, $tableName, $camelName],
-            File::get(base_path('stubs/module/service.stub'))
-        );
-        File::put(app_path("Services/Modules/{$studlyName}Service.php"), $serviceContentBackend);
+        try {
+            $serviceContentBackend = str_replace(
+                ['{{studlyName}}', '{{tableName}}', '{{camelName}}'],
+                [$studlyName, $tableName, $camelName],
+                File::get(base_path('stubs/module/service.stub'))
+            );
+            File::put(app_path("Services/Modules/{$studlyName}Service.php"), $serviceContentBackend);
+        } catch (\Exception $e) {
+            throw new \RuntimeException("Gagal membuat service: " . $e->getMessage());
+        }
         
         // Controller stub
-        $controllerContent = str_replace(
-            ['{{studlyName}}', '{{tableName}}', '{{camelName}}'],
-            [$studlyName, $tableName, $camelName],
-            File::get(base_path('stubs/module/controller.stub'))
-        );
-        File::put(app_path("Http/Controllers/Modules/{$studlyName}Controller.php"), $controllerContent);
+        try {
+            $controllerContent = str_replace(
+                ['{{studlyName}}', '{{tableName}}', '{{camelName}}'],
+                [$studlyName, $tableName, $camelName],
+                File::get(base_path('stubs/module/controller.stub'))
+            );
+            File::put(app_path("Http/Controllers/Modules/{$studlyName}Controller.php"), $controllerContent);
+        } catch (\Exception $e) {
+            throw new \RuntimeException("Gagal membuat controller: " . $e->getMessage());
+        }
         
         // Request stubs
-        $storeRequestContent = str_replace(
-            ['{{studlyName}}'],
-            [$studlyName],
-            File::get(base_path('stubs/module/store-request.stub'))
-        );
-        $updateRequestContent = str_replace(
-            ['{{studlyName}}'],
-            [$studlyName],
-            File::get(base_path('stubs/module/update-request.stub'))
-        );
-        File::put(app_path("Http/Requests/Modules/Store{$studlyName}Request.php"), $storeRequestContent);
-        File::put(app_path("Http/Requests/Modules/Update{$studlyName}Request.php"), $updateRequestContent);
+        try {
+            $storeRequestContent = str_replace(
+                ['{{studlyName}}'],
+                [$studlyName],
+                File::get(base_path('stubs/module/store-request.stub'))
+            );
+            $updateRequestContent = str_replace(
+                ['{{studlyName}}'],
+                [$studlyName],
+                File::get(base_path('stubs/module/update-request.stub'))
+            );
+            File::put(app_path("Http/Requests/Modules/Store{$studlyName}Request.php"), $storeRequestContent);
+            File::put(app_path("Http/Requests/Modules/Update{$studlyName}Request.php"), $updateRequestContent);
+        } catch (\Exception $e) {
+            throw new \RuntimeException("Gagal membuat request: " . $e->getMessage());
+        }
         
         // Route file
-        $routeContent = str_replace(
-            ['{{studlyName}}', '{{tableName}}', '{{camelName}}'],
-            [$studlyName, $tableName, $camelName],
-            File::get(base_path('stubs/module/route.stub'))
-        );
-        File::put(base_path("routes/modules/{$moduleKey}.php"), $routeContent);
+        try {
+            $routeContent = str_replace(
+                ['{{studlyName}}', '{{tableName}}', '{{camelName}}'],
+                [$studlyName, $tableName, $camelName],
+                File::get(base_path('stubs/module/route.stub'))
+            );
+            File::put(base_path("routes/modules/{$moduleKey}.php"), $routeContent);
+        } catch (\Exception $e) {
+            throw new \RuntimeException("Gagal membuat route: " . $e->getMessage());
+        }
         
         // Register in moduleRegistry
         $this->registerModuleInRegistry($moduleKey, $studlyName);
+        
+        // Auto run migration
+        try {
+            Artisan::call('migrate', [
+                '--path' => "database/migrations/{$timestamp}_create_{$tableName}s_table.php",
+                '--force' => true,
+            ]);
+            Log::info("Migration executed for module {$moduleKey}: " . Artisan::output());
+        } catch (\Exception $e) {
+            Log::error("Failed to run migration for module {$moduleKey}: " . $e->getMessage());
+            throw new \RuntimeException("Gagal menjalankan migration: " . $e->getMessage());
+        }
     }
     
     private function registerModuleInRegistry(string $moduleKey, string $studlyName): void
