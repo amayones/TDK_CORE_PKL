@@ -50,7 +50,7 @@ function PortalTooltip({ targetRef, show, children }) {
 }
 
 function MenuItem({ menu, basePath }) {
-    const { collapsed } = useSidebar();
+    const { collapsed, closeMobile } = useSidebar();
     const [open, setOpen] = useState(false);
     const [hovered, setHovered] = useState(false);
     const itemRef = useRef(null);
@@ -86,7 +86,7 @@ function MenuItem({ menu, basePath }) {
                     </button>
                 </div>
 
-                {/* Tooltip via Portal saat collapsed */}
+                {/* Tooltip via Portal saat collapsed (desktop only) */}
                 {collapsed && (
                     <PortalTooltip targetRef={itemRef} show={hovered}>
                         {menu.name}
@@ -114,6 +114,7 @@ function MenuItem({ menu, basePath }) {
             >
                 <NavLink
                     to={`${basePath}${menu.route_path}`}
+                    onClick={closeMobile}
                     className={({ isActive }) =>
                         `flex items-center gap-3 px-3 py-2 text-sm rounded transition-all duration-300 ${
                             isActive
@@ -133,7 +134,7 @@ function MenuItem({ menu, basePath }) {
                 </NavLink>
             </div>
 
-            {/* Tooltip via Portal saat collapsed */}
+            {/* Tooltip via Portal saat collapsed (desktop only) */}
             {collapsed && (
                 <PortalTooltip targetRef={itemRef} show={hovered}>
                     {menu.name}
@@ -145,37 +146,71 @@ function MenuItem({ menu, basePath }) {
 
 export default function Sidebar({ basePath = '/tdk-core-pkl' }) {
     const { menus, loading } = useMenu();
-    const { collapsed, toggle } = useSidebar();
+    const { collapsed, toggle, mobileOpen, closeMobile } = useSidebar();
 
     return (
-        <aside
-            className={`bg-blue-700 h-screen shrink-0 flex flex-col overflow-hidden transition-all duration-300 ease-in-out ${
-                collapsed ? 'w-16' : 'w-64'
-            }`}
-        >
-            {/* Header sidebar: tulisan "Menu" + burger toggle di sebelah kanan */}
-            <div className="px-3 py-3 border-b border-blue-800 flex items-center">
-                {!collapsed && <h2 className="text-white font-bold text-lg">Menu</h2>}
-                <button
-                    onClick={toggle}
-                    className="text-white hover:text-blue-200 focus:outline-none p-1.5 rounded hover:bg-blue-800 transition-colors shrink-0 ml-auto"
-                    aria-label="Toggle sidebar"
-                >
-                    {collapsed ? <Icons.Menu size={18} /> : <Icons.PanelLeftClose size={18} />}
-                </button>
-            </div>
+        <>
+            {/* Mobile: sidebar overlay (fixed) */}
+            <aside
+                className={`fixed inset-y-0 left-0 z-40 bg-blue-700 flex flex-col overflow-hidden transition-transform duration-300 ease-in-out md:hidden ${
+                    mobileOpen ? 'translate-x-0' : '-translate-x-full'
+                } w-64`}
+            >
+                {/* Header sidebar mobile: tulisan "Menu" + tombol close */}
+                <div className="px-3 py-3 border-b border-blue-800 flex items-center">
+                    <h2 className="text-white font-bold text-lg">Menu</h2>
+                    <button
+                        onClick={closeMobile}
+                        className="text-white hover:text-blue-200 focus:outline-none p-1.5 rounded hover:bg-blue-800 transition-colors shrink-0 ml-auto"
+                        aria-label="Close sidebar"
+                    >
+                        <Icons.X size={18} />
+                    </button>
+                </div>
 
-            <div className="flex-1 overflow-y-auto p-2 space-y-1">
-                {loading && <p className="text-blue-200 text-sm px-3">Memuat menu...</p>}
+                <div className="flex-1 overflow-y-auto p-2 space-y-1">
+                    {loading && <p className="text-blue-200 text-sm px-3">Memuat menu...</p>}
 
-                {!loading && menus.length === 0 && (
-                    <p className="text-blue-200 text-sm px-3">Tidak ada menu tersedia.</p>
-                )}
+                    {!loading && menus.length === 0 && (
+                        <p className="text-blue-200 text-sm px-3">Tidak ada menu tersedia.</p>
+                    )}
 
-                {!loading && menus.map((menu) => (
-                    <MenuItem key={menu.id} menu={menu} basePath={basePath} />
-                ))}
-            </div>
-        </aside>
+                    {!loading && menus.map((menu) => (
+                        <MenuItem key={menu.id} menu={menu} basePath={basePath} />
+                    ))}
+                </div>
+            </aside>
+
+            {/* Desktop: sidebar static */}
+            <aside
+                className={`hidden md:flex bg-blue-700 h-screen shrink-0 flex-col overflow-hidden transition-all duration-300 ease-in-out ${
+                    collapsed ? 'w-16' : 'w-64'
+                }`}
+            >
+                {/* Header sidebar desktop: tulisan "Menu" + burger toggle di sebelah kanan */}
+                <div className="px-3 py-3 border-b border-blue-800 flex items-center">
+                    {!collapsed && <h2 className="text-white font-bold text-lg">Menu</h2>}
+                    <button
+                        onClick={toggle}
+                        className="text-white hover:text-blue-200 focus:outline-none p-1.5 rounded hover:bg-blue-800 transition-colors shrink-0 ml-auto"
+                        aria-label="Toggle sidebar"
+                    >
+                        {collapsed ? <Icons.Menu size={18} /> : <Icons.PanelLeftClose size={18} />}
+                    </button>
+                </div>
+
+                <div className="flex-1 overflow-y-auto p-2 space-y-1">
+                    {loading && <p className="text-blue-200 text-sm px-3">Memuat menu...</p>}
+
+                    {!loading && menus.length === 0 && (
+                        <p className="text-blue-200 text-sm px-3">Tidak ada menu tersedia.</p>
+                    )}
+
+                    {!loading && menus.map((menu) => (
+                        <MenuItem key={menu.id} menu={menu} basePath={basePath} />
+                    ))}
+                </div>
+            </aside>
+        </>
     );
 }

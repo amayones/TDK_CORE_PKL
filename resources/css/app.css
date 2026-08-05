@@ -27,3 +27,61 @@ body {
 .sidebar-tooltip-enter {
     animation: sidebar-tooltip-in 0.2s ease-out forwards;
 }
+
+/* Table responsive: horizontal scroll di mobile */
+.table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.table-responsive table {
+    min-width: 100%;
+}
+
+/* Pastikan tabel tidak menyusut terlalu kecil di mobile */
+@media (max-width: 640px) {
+    .table-responsive table {
+        min-width: 500px;
+    }
+}
+
+/* ===== Responsive Mobile Global (untuk semua halaman existing) ===== */
+@media (max-width: 640px) {
+    /* Header page: stack vertikal, tombol penuh lebar */
+    .flex.justify-between.items-center:not(.shrink-0) {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 0.75rem !important;
+    }
+    .flex.justify-between.items-center:not(.shrink-0) > div:first-child {
+        flex: 1;
+    }
+    .flex.justify-between.items-center:not(.shrink-0) > button {
+        width: 100%;
+    }
+
+    /* Table: lebar minimum agar bisa horizontal scroll */
+    main table {
+        min-width: 640px;
+        font-size: 0.75rem;
+    }
+
+    main th,
+    main td {
+        padding: 0.375rem 0.25rem;
+    }
+
+    /* Modal: tombol aksi stack vertikal */
+    .flex.justify-end.gap-2.pt-2 {
+        flex-direction: column !important;
+    }
+    .flex.justify-end.gap-2.pt-2 button {
+        width: 100% !important;
+    }
+
+    /* Scroll container agar tabel tidak terpotong */
+    .bg-white.rounded-lg.shadow.overflow-hidden {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+}
