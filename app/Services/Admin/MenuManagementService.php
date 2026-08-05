@@ -122,19 +122,35 @@ class MenuManagementService extends BaseService
     
     private function deleteModuleFiles(string $moduleKey): void
     {
-        $modulePath = resource_path("js/modules/{$moduleKey}");
+        // Convert module_key to studly case for file names (e.g., 'inventory' -> 'Inventory')
+        $studlyKey = ucfirst(str_replace(['-', '_'], '', $moduleKey));
         
-        if (!File::exists($modulePath)) {
-            return;
+        // Frontend files
+        $frontendPath = resource_path("js/modules/{$moduleKey}");
+        if (File::exists($frontendPath)) {
+            File::deleteDirectory($frontendPath);
         }
         
-        // Delete the entire module directory recursively
-        File::deleteDirectory($modulePath);
-        
-        // Also delete route file if exists
+        // Route file
         $routeFile = base_path("routes/modules/{$moduleKey}.php");
         if (File::exists($routeFile)) {
             File::delete($routeFile);
+        }
+        
+        // Backend files
+        $backendFiles = [
+            app_path("Models/{$studlyKey}.php"),
+            app_path("Repositories/{$studlyKey}Repository.php"),
+            app_path("Services/Modules/{$studlyKey}Service.php"),
+            app_path("Http/Controllers/Modules/{$studlyKey}Controller.php"),
+            app_path("Http/Requests/Modules/Store{$studlyKey}Request.php"),
+            app_path("Http/Requests/Modules/Update{$studlyKey}Request.php"),
+        ];
+        
+        foreach ($backendFiles as $file) {
+            if (File::exists($file)) {
+                File::delete($file);
+            }
         }
     }
 }
