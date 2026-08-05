@@ -7,6 +7,7 @@ use App\Repositories\MenuRepository;
 use App\Models\AuditLog;
 use App\Models\Menu;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\File;
 
 class MenuManagementService extends BaseService
 {
@@ -101,6 +102,12 @@ class MenuManagementService extends BaseService
         }
 
         $oldData = $menu->toArray();
+        
+        // Delete module files if module_key exists
+        if ($menu->module_key) {
+            $this->deleteModuleFiles($menu->module_key);
+        }
+        
         $this->menuRepository->delete($id);
 
         AuditLog::record(
@@ -111,5 +118,23 @@ class MenuManagementService extends BaseService
         );
 
         return true;
+    }
+    
+    private function deleteModuleFiles(string $moduleKey): void
+    {
+        $modulePath = resource_path("js/modules/{$moduleKey}");
+        
+        if (!File::exists($modulePath)) {
+            return;
+        }
+        
+        // Delete the entire module directory recursively
+        File::deleteDirectory($modulePath);
+        
+        // Also delete route file if exists
+        $routeFile = base_path("routes/modules/{$moduleKey}.php");
+        if (File::exists($routeFile)) {
+            File::delete($routeFile);
+        }
     }
 }
