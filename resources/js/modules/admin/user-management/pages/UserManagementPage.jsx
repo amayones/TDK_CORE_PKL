@@ -47,8 +47,10 @@ export default function UserManagementPage() {
         try {
             if (editingUser) {
                 await updateUser(editingUser.id, form);
+                window.__APP__.alert('User berhasil diupdate', 'success');
             } else {
                 await createUser(form);
+                window.__APP__.alert('User berhasil ditambahkan', 'success');
             }
             setModalOpen(false);
             loadUsers(search);
@@ -67,6 +69,7 @@ export default function UserManagementPage() {
         });
         if (!confirmed) return;
         await deleteUser(user.id);
+        window.__APP__.alert('User berhasil dihapus', 'success');
         loadUsers(search);
     };
 

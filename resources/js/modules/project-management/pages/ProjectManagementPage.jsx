@@ -53,8 +53,10 @@ export default function ProjectManagementPage() {
         try {
             if (editingProject) {
                 await updateProject(editingProject.id, form);
+                window.__APP__.alert('Project berhasil diupdate', 'success');
             } else {
                 await createProject(form);
+                window.__APP__.alert('Project berhasil ditambahkan', 'success');
             }
             setModalOpen(false);
             loadProjects();
@@ -73,6 +75,7 @@ export default function ProjectManagementPage() {
         });
         if (!confirmed) return;
         await deleteProject(project.id);
+        window.__APP__.alert('Project berhasil dihapus', 'success');
         loadProjects();
     };
 

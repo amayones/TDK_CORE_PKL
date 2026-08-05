@@ -46,8 +46,10 @@ export default function GroupManagementPage() {
         try {
             if (editingGroup) {
                 await updateGroup(editingGroup.id, form);
+                window.__APP__.alert('Group berhasil diupdate', 'success');
             } else {
                 await createGroup(form);
+                window.__APP__.alert('Group berhasil ditambahkan', 'success');
             }
             setModalOpen(false);
             loadGroups(search);
@@ -68,6 +70,7 @@ export default function GroupManagementPage() {
         setDeleteError('');
         try {
             await deleteGroup(group.id);
+            window.__APP__.alert('Group berhasil dihapus', 'success');
             loadGroups(search);
         } catch (err) {
             const message = err.response?.data?.errors?.code?.[0] || 'Gagal menghapus group.';

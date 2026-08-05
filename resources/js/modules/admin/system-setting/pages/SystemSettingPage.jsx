@@ -39,8 +39,10 @@ export default function SystemSettingPage() {
         try {
             if (editingSetting) {
                 await updateSetting(editingSetting.id, form);
+                window.__APP__.alert('System setting berhasil diupdate', 'success');
             } else {
                 await createSetting(form);
+                window.__APP__.alert('System setting berhasil ditambahkan', 'success');
             }
             setModalOpen(false);
             loadSettings();
@@ -59,6 +61,7 @@ export default function SystemSettingPage() {
         });
         if (!confirmed) return;
         await deleteSetting(setting.id);
+        window.__APP__.alert('System setting berhasil dihapus', 'success');
         loadSettings();
     };
 

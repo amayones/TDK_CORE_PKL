@@ -39,8 +39,10 @@ export default function InventoryPage() {
         try {
             if (editingItem) {
                 await updateInventory(editingItem.id, form);
+                window.__APP__.alert('Data inventory berhasil diupdate', 'success');
             } else {
                 await createInventory(form);
+                window.__APP__.alert('Data inventory berhasil ditambahkan', 'success');
             }
             setModalOpen(false);
             loadItems();
@@ -59,6 +61,7 @@ export default function InventoryPage() {
         });
         if (!confirmed) return;
         await deleteInventory(item.id);
+        window.__APP__.alert('Data inventory berhasil dihapus', 'success');
         loadItems();
     };
 

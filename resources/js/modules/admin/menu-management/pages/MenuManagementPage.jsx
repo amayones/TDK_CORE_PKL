@@ -46,8 +46,10 @@ export default function MenuManagementPage() {
             const payload = { ...form, parent_id: form.parent_id || null };
             if (editingMenu) {
                 await updateMenu(editingMenu.id, payload);
+                window.__APP__.alert('Menu berhasil diupdate', 'success');
             } else {
                 await createMenu(payload);
+                window.__APP__.alert('Menu berhasil ditambahkan', 'success');
             }
             setModalOpen(false);
             loadData();
@@ -68,6 +70,7 @@ export default function MenuManagementPage() {
         setDeleteError('');
         try {
             await deleteMenu(menu.id);
+            window.__APP__.alert('Menu berhasil dihapus', 'success');
             loadData();
         } catch (err) {
             const message = err.response?.data?.errors?.module_key?.[0] || 'Gagal menghapus menu.';

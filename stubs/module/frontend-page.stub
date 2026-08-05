@@ -39,8 +39,10 @@ export default function {{studlyName}}Page() {
         try {
             if (editingItem) {
                 await update{{studlyName}}(editingItem.id, form);
+                window.__APP__.alert('Data berhasil diupdate', 'success');
             } else {
                 await create{{studlyName}}(form);
+                window.__APP__.alert('Data berhasil ditambahkan', 'success');
             }
             setModalOpen(false);
             loadItems();
@@ -59,6 +61,7 @@ export default function {{studlyName}}Page() {
         });
         if (!confirmed) return;
         await delete{{studlyName}}(item.id);
+        window.__APP__.alert('Data berhasil dihapus', 'success');
         loadItems();
     };
 
