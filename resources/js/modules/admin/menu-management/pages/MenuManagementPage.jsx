@@ -57,7 +57,14 @@ export default function MenuManagementPage() {
     };
 
     const handleDelete = async (menu) => {
-        if (!confirm(`Hapus menu "${menu.name}"?`)) return;
+        const confirmed = await window.__APP__.confirm({
+            type: 'danger',
+            title: 'Hapus Menu',
+            message: `Apakah Anda yakin ingin menghapus menu "${menu.name}"?`,
+            confirmText: 'Ya, Hapus',
+            cancelText: 'Batal'
+        });
+        if (!confirmed) return;
         setDeleteError('');
         try {
             await deleteMenu(menu.id);

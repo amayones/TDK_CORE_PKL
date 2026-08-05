@@ -58,7 +58,14 @@ export default function UserManagementPage() {
     };
 
     const handleDelete = async (user) => {
-        if (!confirm(`Hapus user "${user.name}"?`)) return;
+        const confirmed = await window.__APP__.confirm({
+            type: 'danger',
+            title: 'Hapus User',
+            message: `Apakah Anda yakin ingin menghapus user "${user.name}"?`,
+            confirmText: 'Ya, Hapus',
+            cancelText: 'Batal'
+        });
+        if (!confirmed) return;
         await deleteUser(user.id);
         loadUsers(search);
     };

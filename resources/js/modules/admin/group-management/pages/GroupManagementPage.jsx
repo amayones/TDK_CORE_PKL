@@ -57,7 +57,14 @@ export default function GroupManagementPage() {
     };
 
     const handleDelete = async (group) => {
-        if (!confirm(`Hapus group "${group.name}"?`)) return;
+        const confirmed = await window.__APP__.confirm({
+            type: 'danger',
+            title: 'Hapus Group',
+            message: `Apakah Anda yakin ingin menghapus group "${group.name}"?`,
+            confirmText: 'Ya, Hapus',
+            cancelText: 'Batal'
+        });
+        if (!confirmed) return;
         setDeleteError('');
         try {
             await deleteGroup(group.id);

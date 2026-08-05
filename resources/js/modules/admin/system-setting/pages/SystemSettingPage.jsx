@@ -50,7 +50,14 @@ export default function SystemSettingPage() {
     };
 
     const handleDelete = async (setting) => {
-        if (!confirm(`Hapus setting "${setting.key}"?`)) return;
+        const confirmed = await window.__APP__.confirm({
+            type: 'danger',
+            title: 'Hapus System Setting',
+            message: `Apakah Anda yakin ingin menghapus setting "${setting.key}"?`,
+            confirmText: 'Ya, Hapus',
+            cancelText: 'Batal'
+        });
+        if (!confirmed) return;
         await deleteSetting(setting.id);
         loadSettings();
     };

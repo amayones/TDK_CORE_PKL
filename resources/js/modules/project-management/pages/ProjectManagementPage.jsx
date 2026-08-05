@@ -64,7 +64,14 @@ export default function ProjectManagementPage() {
     };
 
     const handleDelete = async (project) => {
-        if (!confirm(`Hapus project "${project.name}"?`)) return;
+        const confirmed = await window.__APP__.confirm({
+            type: 'danger',
+            title: 'Hapus Project',
+            message: `Apakah Anda yakin ingin menghapus project "${project.name}"?`,
+            confirmText: 'Ya, Hapus',
+            cancelText: 'Batal'
+        });
+        if (!confirmed) return;
         await deleteProject(project.id);
         loadProjects();
     };

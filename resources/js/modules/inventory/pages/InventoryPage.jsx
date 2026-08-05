@@ -50,7 +50,14 @@ export default function InventoryPage() {
     };
 
     const handleDelete = async (item) => {
-        if (!confirm(`Hapus data "${item.name}"?`)) return;
+        const confirmed = await window.__APP__.confirm({
+            type: 'danger',
+            title: 'Hapus Data Inventory',
+            message: `Apakah Anda yakin ingin menghapus data "${item.name}"?`,
+            confirmText: 'Ya, Hapus',
+            cancelText: 'Batal'
+        });
+        if (!confirmed) return;
         await deleteInventory(item.id);
         loadItems();
     };
