@@ -9,7 +9,6 @@ export default function MenuAccessManagementPage() {
     const [matrix, setMatrix] = useState([]);
     const [loading, setLoading] = useState(false);
     const [saving, setSaving] = useState(false);
-    const [saveMessage, setSaveMessage] = useState('');
 
     useEffect(() => {
         fetchAccessGroups().then((data) => {
@@ -22,7 +21,6 @@ export default function MenuAccessManagementPage() {
     const loadMatrix = useCallback(async (groupId) => {
         if (!groupId) return;
         setLoading(true);
-        setSaveMessage('');
         try {
             const data = await fetchAccessMatrix(groupId);
             setGroupInfo(data.group);
@@ -48,12 +46,11 @@ export default function MenuAccessManagementPage() {
 
     const handleSave = async () => {
         setSaving(true);
-        setSaveMessage('');
         try {
             await saveAccessMatrix(selectedGroupId, matrix);
-            setSaveMessage('Hak akses berhasil disimpan.');
+            window.__APP__.alert('Hak akses berhasil disimpan', 'success');
         } catch (err) {
-            setSaveMessage('Gagal menyimpan hak akses.');
+            window.__APP__.alert('Gagal menyimpan hak akses', 'error');
         } finally {
             setSaving(false);
         }
@@ -87,14 +84,6 @@ export default function MenuAccessManagementPage() {
                     <div className="flex items-center gap-2 bg-amber-50 text-amber-700 text-sm px-4 py-3 rounded">
                         <ShieldAlert size={18} />
                         Group Administrator selalu memiliki akses penuh ke seluruh menu dan tidak dapat diubah.
-                    </div>
-                )}
-
-                {saveMessage && (
-                    <div className={`text-sm px-4 py-2 rounded ${
-                        saveMessage.includes('berhasil') ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
-                    }`}>
-                        {saveMessage}
                     </div>
                 )}
 
