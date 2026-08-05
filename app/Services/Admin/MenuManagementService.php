@@ -48,6 +48,13 @@ class MenuManagementService extends BaseService
             newData: $menu->toArray()
         );
 
+        // If module_key is set and generate_module flag is true, create module files
+        if (!empty($menu->module_key) && !empty($data['generate_module'])) {
+            $studlyName = ucfirst(str_replace(['-', '_'], '', $menu->module_key));
+            $tableName = Str::snake(Str::plural($studlyName));
+            $this->generateModule($menu->module_key, $studlyName, $tableName);
+        }
+
         return $menu;
     }
 

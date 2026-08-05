@@ -14,6 +14,7 @@ export default function MenuFormModal({ isOpen, onClose, onSubmit, topLevelMenus
         backend_repository: '',
         sort_order: 0,
         is_active: true,
+        generate_module: false,
     });
     const [errors, setErrors] = useState({});
 
@@ -31,12 +32,13 @@ export default function MenuFormModal({ isOpen, onClose, onSubmit, topLevelMenus
                 backend_repository: initialData.backend_repository || '',
                 sort_order: initialData.sort_order || 0,
                 is_active: initialData.is_active ?? true,
+                generate_module: false,
             });
         } else {
             setForm({
                 parent_id: '', module_key: '', name: '', icon: '', route_path: '',
                 frontend_path: '', backend_controller: '', backend_service: '',
-                backend_repository: '', sort_order: 0, is_active: true,
+                backend_repository: '', sort_order: 0, is_active: true, generate_module: false,
             });
         }
         setErrors({});
@@ -235,6 +237,21 @@ export default function MenuFormModal({ isOpen, onClose, onSubmit, topLevelMenus
                             <label htmlFor="menu_is_active" className="text-sm text-gray-700">Menu Aktif</label>
                         </div>
                     </div>
+
+                    {!initialData && form.module_key && (
+                        <div className="flex items-center gap-2">
+                            <input
+                                type="checkbox"
+                                name="generate_module"
+                                id="menu_generate_module"
+                                checked={form.generate_module}
+                                onChange={handleChange}
+                            />
+                            <label htmlFor="menu_generate_module" className="text-sm text-gray-700">
+                                Generate module otomatis (frontend + backend + migration + route)
+                            </label>
+                        </div>
+                    )}
 
                     <div className="flex justify-end gap-2 pt-2 border-t">
                         <button

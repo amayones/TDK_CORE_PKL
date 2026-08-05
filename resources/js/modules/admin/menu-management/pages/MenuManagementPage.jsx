@@ -13,9 +13,6 @@ export default function MenuManagementPage() {
     const [editingMenu, setEditingMenu] = useState(null);
     const [submitting, setSubmitting] = useState(false);
     const [deleteError, setDeleteError] = useState('');
-    const [generateModalOpen, setGenerateModalOpen] = useState(false);
-    const [generating, setGenerating] = useState(false);
-    const [genForm, setGenForm] = useState({ module_key: '', studly_name: '', table_name: '' });
 
     const loadData = useCallback(async () => {
         setLoading(true);
@@ -83,22 +80,6 @@ export default function MenuManagementPage() {
         }
     };
 
-    const handleGenerateModule = async (e) => {
-        e.preventDefault();
-        setGenerating(true);
-        try {
-            await window.__APP__.axios.post('/admin/menus/generate-module', genForm);
-            window.__APP__.alert('Module berhasil dibuat', 'success');
-            setGenerateModalOpen(false);
-            setGenForm({ module_key: '', studly_name: '', table_name: '' });
-        } catch (err) {
-            const msg = err.response?.data?.message || 'Gagal membuat module.';
-            window.__APP__.alert(msg, 'error');
-        } finally {
-            setGenerating(false);
-        }
-    };
-
     return (
         <div className="space-y-4">
             <div className="flex justify-between items-center">
@@ -107,20 +88,12 @@ export default function MenuManagementPage() {
                     <p className="text-gray-500 text-sm">Kelola struktur menu sidebar aplikasi.</p>
                 </div>
                 {hasPermission('menu-management', 'can_create') && (
-                    <div className="flex gap-2">
-                        <button
-                            onClick={openCreateModal}
-                            className="flex items-center gap-2 bg-blue-700 text-white px-4 py-2 rounded text-sm hover:bg-blue-800"
-                        >
-                            <Plus size={16} /> Tambah Menu
-                        </button>
-                        <button
-                            onClick={() => setGenerateModalOpen(true)}
-                            className="flex items-center gap-2 bg-green-700 text-white px-4 py-2 rounded text-sm hover:bg-green-800"
-                        >
-                            <Plus size={16} /> Generate Module
-                        </button>
-                    </div>
+                    <button
+                        onClick={openCreateModal}
+                        className="flex items-center gap-2 bg-blue-700 text-white px-4 py-2 rounded text-sm hover:bg-blue-800"
+                    >
+                        <Plus size={16} /> Tambah Menu
+                    </button>
                 )}
             </div>
 
@@ -208,65 +181,6 @@ export default function MenuManagementPage() {
                 initialData={editingMenu}
                 submitting={submitting}
             />
-
-            {generateModalOpen && (
-                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-                    <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-lg">
-                        <h3 className="text-lg font-semibold mb-4">Generate Module Baru</h3>
-                        <form onSubmit={handleGenerateModule} className="space-y-4">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Module Key</label>
-                                <input
-                                    type="text"
-                                    required
-                                    value={genForm.module_key}
-                                    onChange={(e) => setGenForm({ ...genForm, module_key: e.target.value })}
-                                    className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
-                                    placeholder="contoh: inventory"
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Studly Name</label>
-                                <input
-                                    type="text"
-                                    required
-                                    value={genForm.studly_name}
-                                    onChange={(e) => setGenForm({ ...genForm, studly_name: e.target.value })}
-                                    className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
-                                    placeholder="contoh: Inventory"
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Table Name</label>
-                                <input
-                                    type="text"
-                                    required
-                                    value={genForm.table_name}
-                                    onChange={(e) => setGenForm({ ...genForm, table_name: e.target.value })}
-                                    className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
-                                    placeholder="contoh: inventory"
-                                />
-                            </div>
-                            <div className="flex justify-end gap-2">
-                                <button
-                                    type="button"
-                                    onClick={() => setGenerateModalOpen(false)}
-                                    className="px-4 py-2 text-sm border border-gray-300 rounded hover:bg-gray-50"
-                                >
-                                    Batal
-                                </button>
-                                <button
-                                    type="submit"
-                                    disabled={generating}
-                                    className="px-4 py-2 text-sm bg-green-700 text-white rounded hover:bg-green-800 disabled:opacity-50"
-                                >
-                                    {generating ? 'Membuat...' : 'Generate Module'}
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            )}
         </div>
     );
 }
