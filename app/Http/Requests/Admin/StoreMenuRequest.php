@@ -25,6 +25,7 @@ class StoreMenuRequest extends FormRequest
             'backend_repository'  => ['nullable', 'string', 'max:255'],
             'sort_order'          => ['integer'],
             'is_active'           => ['boolean'],
+            'generate_module'     => ['nullable', 'boolean'],
         ];
     }
 

@@ -49,7 +49,8 @@ class MenuManagementService extends BaseService
         );
 
         // If module_key is set and generate_module flag is true, create module files
-        if (!empty($menu->module_key) && !empty($data['generate_module'])) {
+        $generateModule = filter_var($data['generate_module'] ?? false, FILTER_VALIDATE_BOOLEAN);
+        if (!empty($menu->module_key) && $generateModule) {
             $studlyName = ucfirst(str_replace(['-', '_'], '', $menu->module_key));
             $tableName = Str::snake(Str::plural($studlyName));
             $this->generateModule($menu->module_key, $studlyName, $tableName);
