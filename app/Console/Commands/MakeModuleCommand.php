@@ -217,8 +217,8 @@ class MakeModuleCommand extends Command
 
         $importLine = "    '{$moduleKey}': lazy(() => import('../modules/{$moduleKey}/pages/{$studlyName}Page')),\n";
 
-        // Cari posisi "};" penutup objek
-        $closingPos = strrpos($content, '};');
+        // Cari posisi "};" penutup objek moduleRegistry (yang pertama)
+        $closingPos = strpos($content, '};');
 
         if ($closingPos === false) {
             $this->warn("Format moduleRegistry.js tidak dikenali, tambahkan import secara manual.");
@@ -233,7 +233,9 @@ class MakeModuleCommand extends Command
             $beforeClosing .= ',';
         }
 
-        $newContent = $beforeClosing . "\n" . $importLine . "};";
+        // Sisipkan baris import baru, lalu pertahankan sisa file setelah "};" (termasuk export)
+        $afterClosing = substr($content, $closingPos + 2);
+        $newContent = $beforeClosing . "\n" . $importLine . "};" . $afterClosing;
 
         File::put($registryPath, $newContent);
         $this->line("Registered: resources/js/core/moduleRegistry.js (module_key: {$moduleKey})");
