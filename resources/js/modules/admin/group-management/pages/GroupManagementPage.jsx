@@ -2,8 +2,10 @@ import { useState, useEffect, useCallback } from 'react';
 import { Plus, Pencil, Trash2, Search, Loader2 } from 'lucide-react';
 import { fetchGroupsList, createGroup, updateGroup, deleteGroup } from '../services/groupService';
 import GroupFormModal from '../components/GroupFormModal';
+import { useMenu } from '../../../../core/MenuContext';
 
 export default function GroupManagementPage() {
+    const { hasPermission } = useMenu();
     const [groups, setGroups] = useState(null);
     const [search, setSearch] = useState('');
     const [loading, setLoading] = useState(true);
@@ -85,12 +87,14 @@ export default function GroupManagementPage() {
                     <h2 className="text-lg font-semibold text-gray-800">Group Management</h2>
                     <p className="text-gray-500 text-sm">Kelola group hak akses.</p>
                 </div>
-                <button
-                    onClick={openCreateModal}
-                    className="flex items-center gap-2 bg-blue-700 text-white px-4 py-2 rounded text-sm hover:bg-blue-800"
-                >
-                    <Plus size={16} /> Tambah Group
-                </button>
+                {hasPermission('group-management', 'can_create') && (
+                    <button
+                        onClick={openCreateModal}
+                        className="flex items-center gap-2 bg-blue-700 text-white px-4 py-2 rounded text-sm hover:bg-blue-800"
+                    >
+                        <Plus size={16} /> Tambah Group
+                    </button>
+                )}
             </div>
 
             {deleteError && (
@@ -153,18 +157,22 @@ export default function GroupManagementPage() {
                                         </span>
                                     </td>
                                     <td className="px-4 py-3 text-right">
-                                        <button
-                                            onClick={() => openEditModal(group)}
-                                            className="text-blue-600 hover:text-blue-800 mr-3"
-                                        >
-                                            <Pencil size={16} />
-                                        </button>
-                                        <button
-                                            onClick={() => handleDelete(group)}
-                                            className="text-red-600 hover:text-red-800"
-                                        >
-                                            <Trash2 size={16} />
-                                        </button>
+                                        {hasPermission('group-management', 'can_edit') && (
+                                            <button
+                                                onClick={() => openEditModal(group)}
+                                                className="text-blue-600 hover:text-blue-800 mr-3"
+                                            >
+                                                <Pencil size={16} />
+                                            </button>
+                                        )}
+                                        {hasPermission('group-management', 'can_delete') && (
+                                            <button
+                                                onClick={() => handleDelete(group)}
+                                                className="text-red-600 hover:text-red-800"
+                                            >
+                                                <Trash2 size={16} />
+                                            </button>
+                                        )}
                                     </td>
                                 </tr>
                             ))}

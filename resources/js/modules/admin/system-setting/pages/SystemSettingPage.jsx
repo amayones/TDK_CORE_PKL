@@ -2,8 +2,10 @@ import { useState, useEffect, useCallback } from 'react';
 import { Plus, Pencil, Trash2, Loader2 } from 'lucide-react';
 import { fetchSettings, createSetting, updateSetting, deleteSetting } from '../services/systemSettingService';
 import SettingFormModal from '../components/SettingFormModal';
+import { useMenu } from '../../../../core/MenuContext';
 
 export default function SystemSettingPage() {
+    const { hasPermission } = useMenu();
     const [settings, setSettings] = useState([]);
     const [loading, setLoading] = useState(true);
     const [modalOpen, setModalOpen] = useState(false);
@@ -72,12 +74,14 @@ export default function SystemSettingPage() {
                     <h2 className="text-lg font-semibold text-gray-800">System Setting</h2>
                     <p className="text-gray-500 text-sm">Kelola pengaturan konfigurasi aplikasi.</p>
                 </div>
-                <button
-                    onClick={openCreateModal}
-                    className="flex items-center gap-2 bg-blue-700 text-white px-4 py-2 rounded text-sm hover:bg-blue-800"
-                >
-                    <Plus size={16} /> Tambah Setting
-                </button>
+                {hasPermission('system-setting', 'can_create') && (
+                    <button
+                        onClick={openCreateModal}
+                        className="flex items-center gap-2 bg-blue-700 text-white px-4 py-2 rounded text-sm hover:bg-blue-800"
+                    >
+                        <Plus size={16} /> Tambah Setting
+                    </button>
+                )}
             </div>
 
             <div className="bg-white rounded-lg shadow overflow-hidden">
@@ -117,18 +121,22 @@ export default function SystemSettingPage() {
                                         </span>
                                     </td>
                                     <td className="px-4 py-3 text-right">
-                                        <button
-                                            onClick={() => openEditModal(setting)}
-                                            className="text-blue-600 hover:text-blue-800 mr-3"
-                                        >
-                                            <Pencil size={16} />
-                                        </button>
-                                        <button
-                                            onClick={() => handleDelete(setting)}
-                                            className="text-red-600 hover:text-red-800"
-                                        >
-                                            <Trash2 size={16} />
-                                        </button>
+                                        {hasPermission('system-setting', 'can_edit') && (
+                                            <button
+                                                onClick={() => openEditModal(setting)}
+                                                className="text-blue-600 hover:text-blue-800 mr-3"
+                                            >
+                                                <Pencil size={16} />
+                                            </button>
+                                        )}
+                                        {hasPermission('system-setting', 'can_delete') && (
+                                            <button
+                                                onClick={() => handleDelete(setting)}
+                                                className="text-red-600 hover:text-red-800"
+                                            >
+                                                <Trash2 size={16} />
+                                            </button>
+                                        )}
                                     </td>
                                 </tr>
                             ))}

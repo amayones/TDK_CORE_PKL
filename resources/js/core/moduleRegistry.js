@@ -14,7 +14,6 @@ const moduleRegistry = {
     'system-setting': lazy(() => import('../modules/admin/system-setting/pages/SystemSettingPage')),
     'audit-log': lazy(() => import('../modules/admin/audit-log/pages/AuditLogPage')),
     'project-management': lazy(() => import('../modules/project-management/pages/ProjectManagementPage')),
-    'inventory': lazy(() => import('../modules/inventory/pages/InventoryPage')),
 };
 
 export function getModuleComponent(moduleKey) {

@@ -46,8 +46,13 @@ export function MenuProvider({ children }) {
         return flattenMenus(menus).find((m) => m.route_path === routePath);
     };
 
+    const hasPermission = (moduleKey, permission) => {
+        const menu = flattenMenus(menus).find((m) => m.module_key === moduleKey);
+        return menu?.permissions?.[permission] === true;
+    };
+
     return (
-        <MenuContext.Provider value={{ menus, loading, findMenuByPath, reloadMenu: loadMenu }}>
+        <MenuContext.Provider value={{ menus, loading, findMenuByPath, hasPermission, reloadMenu: loadMenu }}>
             {children}
         </MenuContext.Provider>
     );

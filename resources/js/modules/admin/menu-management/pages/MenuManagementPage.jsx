@@ -2,8 +2,10 @@ import { useState, useEffect, useCallback } from 'react';
 import { Plus, Pencil, Trash2, Loader2 } from 'lucide-react';
 import { fetchAllMenus, fetchTopLevelMenus, createMenu, updateMenu, deleteMenu } from '../services/menuManagementService';
 import MenuFormModal from '../components/MenuFormModal';
+import { useMenu } from '../../../../core/MenuContext';
 
 export default function MenuManagementPage() {
+    const { hasPermission } = useMenu();
     const [menus, setMenus] = useState([]);
     const [topLevelMenus, setTopLevelMenus] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -85,12 +87,14 @@ export default function MenuManagementPage() {
                     <h2 className="text-lg font-semibold text-gray-800">Menu Management</h2>
                     <p className="text-gray-500 text-sm">Kelola struktur menu sidebar aplikasi.</p>
                 </div>
-                <button
-                    onClick={openCreateModal}
-                    className="flex items-center gap-2 bg-blue-700 text-white px-4 py-2 rounded text-sm hover:bg-blue-800"
-                >
-                    <Plus size={16} /> Tambah Menu
-                </button>
+                {hasPermission('menu-management', 'can_create') && (
+                    <button
+                        onClick={openCreateModal}
+                        className="flex items-center gap-2 bg-blue-700 text-white px-4 py-2 rounded text-sm hover:bg-blue-800"
+                    >
+                        <Plus size={16} /> Tambah Menu
+                    </button>
+                )}
             </div>
 
             {deleteError && (
@@ -145,18 +149,22 @@ export default function MenuManagementPage() {
                                         </span>
                                     </td>
                                     <td className="px-4 py-3 text-right">
-                                        <button
-                                            onClick={() => openEditModal(menu)}
-                                            className="text-blue-600 hover:text-blue-800 mr-3"
-                                        >
-                                            <Pencil size={16} />
-                                        </button>
-                                        <button
-                                            onClick={() => handleDelete(menu)}
-                                            className="text-red-600 hover:text-red-800"
-                                        >
-                                            <Trash2 size={16} />
-                                        </button>
+                                        {hasPermission('menu-management', 'can_edit') && (
+                                            <button
+                                                onClick={() => openEditModal(menu)}
+                                                className="text-blue-600 hover:text-blue-800 mr-3"
+                                            >
+                                                <Pencil size={16} />
+                                            </button>
+                                        )}
+                                        {hasPermission('menu-management', 'can_delete') && (
+                                            <button
+                                                onClick={() => handleDelete(menu)}
+                                                className="text-red-600 hover:text-red-800"
+                                            >
+                                                <Trash2 size={16} />
+                                            </button>
+                                        )}
                                     </td>
                                 </tr>
                             ))}
