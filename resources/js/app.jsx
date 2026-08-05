@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import { AuthProvider } from './core/AuthContext';
 import { MenuProvider } from './core/MenuContext';
+import { SidebarProvider } from './core/SidebarContext';
 import AppRoutes from './routes/AppRoutes';
 import '../css/app.css';
 
@@ -15,7 +16,9 @@ if (container) {
             <BrowserRouter>
                 <AuthProvider>
                     <MenuProvider>
-                        <AppRoutes />
+                        <SidebarProvider>
+                            <AppRoutes />
+                        </SidebarProvider>
                     </MenuProvider>
                 </AuthProvider>
             </BrowserRouter>
