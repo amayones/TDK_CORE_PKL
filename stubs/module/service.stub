@@ -1,0 +1,72 @@
+<?php
+
+namespace App\Services\Modules;
+
+use App\Core\BaseService;
+use App\Repositories\{{studlyName}}Repository;
+use App\Models\AuditLog;
+
+class {{studlyName}}Service extends BaseService
+{
+    protected {{studlyName}}Repository ${{camelName}}Repository;
+
+    public function __construct({{studlyName}}Repository ${{camelName}}Repository)
+    {
+        parent::__construct(${{camelName}}Repository);
+        $this->{{camelName}}Repository = ${{camelName}}Repository;
+    }
+
+    public function list(int $perPage = 15, ?string $search = null)
+    {
+        return $this->{{camelName}}Repository->paginateWithSearch($perPage, $search);
+    }
+
+    public function createItem(array $data)
+    {
+        $item = $this->{{camelName}}Repository->create($data);
+
+        AuditLog::record(
+            action: 'CREATE',
+            module: '{{moduleKey}}',
+            description: "Membuat data baru: {$item->name}",
+            newData: $item->toArray()
+        );
+
+        return $item;
+    }
+
+    public function updateItem(int $id, array $data)
+    {
+        $item = $this->{{camelName}}Repository->find($id);
+        $oldData = $item->toArray();
+
+        $updated = $this->{{camelName}}Repository->update($id, $data);
+
+        AuditLog::record(
+            action: 'UPDATE',
+            module: '{{moduleKey}}',
+            description: "Mengubah data: {$updated->name}",
+            oldData: $oldData,
+            newData: $updated->toArray()
+        );
+
+        return $updated;
+    }
+
+    public function deleteItem(int $id)
+    {
+        $item = $this->{{camelName}}Repository->find($id);
+        $oldData = $item->toArray();
+
+        $this->{{camelName}}Repository->delete($id);
+
+        AuditLog::record(
+            action: 'DELETE',
+            module: '{{moduleKey}}',
+            description: "Menghapus data: {$item->name}",
+            oldData: $oldData
+        );
+
+        return true;
+    }
+}

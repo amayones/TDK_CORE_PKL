@@ -1,0 +1,21 @@
+import api from '../../../services/api';
+
+export async function fetch{{studlyName}}List(params = {}) {
+    const response = await api.get('/{{moduleKey}}', { params });
+    return response.data.data;
+}
+
+export async function create{{studlyName}}(payload) {
+    const response = await api.post('/{{moduleKey}}', payload);
+    return response.data.data;
+}
+
+export async function update{{studlyName}}(id, payload) {
+    const response = await api.put(`/{{moduleKey}}/${id}`, payload);
+    return response.data.data;
+}
+
+export async function delete{{studlyName}}(id) {
+    const response = await api.delete(`/{{moduleKey}}/${id}`);
+    return response.data;
+}

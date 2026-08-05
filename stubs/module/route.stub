@@ -1,0 +1,24 @@
+<?php
+
+use App\Http\Controllers\Modules\{{studlyName}}Controller;
+use Illuminate\Support\Facades\Route;
+
+Route::middleware(['auth:sanctum'])->group(function () {
+
+    Route::middleware('menu.access:{{moduleKey}},can_view')->group(function () {
+        Route::get('/{{moduleKey}}', [{{studlyName}}Controller::class, 'index']);
+        Route::get('/{{moduleKey}}/{id}', [{{studlyName}}Controller::class, 'show']);
+    });
+
+    Route::middleware('menu.access:{{moduleKey}},can_create')->group(function () {
+        Route::post('/{{moduleKey}}', [{{studlyName}}Controller::class, 'store']);
+    });
+
+    Route::middleware('menu.access:{{moduleKey}},can_edit')->group(function () {
+        Route::put('/{{moduleKey}}/{id}', [{{studlyName}}Controller::class, 'update']);
+    });
+
+    Route::middleware('menu.access:{{moduleKey}},can_delete')->group(function () {
+        Route::delete('/{{moduleKey}}/{id}', [{{studlyName}}Controller::class, 'destroy']);
+    });
+});
