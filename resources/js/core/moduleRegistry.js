@@ -15,6 +15,7 @@ const moduleRegistry = {
     'audit-log': lazy(() => import('../modules/admin/audit-log/pages/AuditLogPage')),
     'project-management': lazy(() => import('../modules/project-management/pages/ProjectManagementPage')),
     'tes': lazy(() => import('../modules/tes/pages/TesPage')),
+    'tes2': lazy(() => import('../modules/tes2/pages/Tes2Page')),
 };
 
 export function getModuleComponent(moduleKey) {

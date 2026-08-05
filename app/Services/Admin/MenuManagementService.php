@@ -8,6 +8,7 @@ use App\Models\AuditLog;
 use App\Models\Menu;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Str;
 
 class MenuManagementService extends BaseService
 {
@@ -124,6 +125,7 @@ class MenuManagementService extends BaseService
     {
         // Convert module_key to studly case for file names (e.g., 'inventory' -> 'Inventory')
         $studlyKey = ucfirst(str_replace(['-', '_'], '', $moduleKey));
+        $tableName = Str::snake(Str::plural($studlyKey));
         
         // Frontend files
         $frontendPath = resource_path("js/modules/{$moduleKey}");
@@ -135,6 +137,25 @@ class MenuManagementService extends BaseService
         $routeFile = base_path("routes/modules/{$moduleKey}.php");
         if (File::exists($routeFile)) {
             File::delete($routeFile);
+        }
+        
+        // Migration file - find any file with create_{table}_table
+        $migrationFiles = File::glob(database_path("migrations/*create_{$tableName}_table.php"));
+        foreach ($migrationFiles as $file) {
+            if (File::exists($file)) {
+                File::delete($file);
+            }
+        }
+        
+        // Remove entry from moduleRegistry.js
+        $registryPath = resource_path('js/core/moduleRegistry.js');
+        if (File::exists($registryPath)) {
+            $registryContent = File::get($registryPath);
+            $pattern = "/    '{$moduleKey}': lazy\(\(\) => import\('\.\.\/modules\/{$moduleKey}\/pages\/.*?'\),\n/";
+            $newRegistryContent = preg_replace($pattern, '', $registryContent);
+            if ($newRegistryContent !== $registryContent) {
+                File::put($registryPath, $newRegistryContent);
+            }
         }
         
         // Backend files
