@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Plus, Pencil, Trash2, Search, Loader2 } from 'lucide-react';
+import { Plus, Pencil, Trash2, Search, Loader2, Users } from 'lucide-react';
 import { fetchUsers, fetchGroups, createUser, updateUser, deleteUser } from '../services/userService';
 import UserFormModal from '../components/UserFormModal';
 import { useMenu } from '../../../../core/MenuContext';
@@ -76,95 +76,142 @@ export default function UserManagementPage() {
     };
 
     return (
-        <div className="space-y-4">
-            <div className="flex justify-between items-center">
+        <div className="space-y-6">
+            {/* Header */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                    <h2 className="text-lg font-semibold text-gray-800">User Management</h2>
-                    <p className="text-gray-500 text-sm">Kelola user dan akses group.</p>
+                    <h2 className="text-2xl font-bold text-gray-800">User Management</h2>
+                    <p className="text-gray-400 text-sm mt-1">Kelola user, group, dan status akun dalam satu tempat.</p>
                 </div>
                 {hasPermission('user-management', 'can_create') && (
                     <button
                         onClick={openCreateModal}
-                        className="flex items-center gap-2 bg-blue-700 text-white px-4 py-2 rounded text-sm hover:bg-blue-800"
+                        className="flex items-center gap-2 text-white px-4 py-2 rounded-xl text-sm font-medium shadow-sm hover:opacity-90 transition-opacity shrink-0"
+                        style={{ background: 'linear-gradient(135deg, #30AFFF, #CFECF3)' }}
                     >
                         <Plus size={16} /> Tambah User
                     </button>
                 )}
             </div>
 
-            <form onSubmit={handleSearch} className="flex gap-2">
-                <input
-                    type="text"
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    placeholder="Cari nama, username, atau email..."
-                    className="border border-gray-300 rounded px-3 py-2 text-sm w-full max-w-sm"
-                />
-                <button type="submit" className="bg-gray-200 px-3 py-2 rounded text-sm hover:bg-gray-300">
-                    <Search size={16} />
-                </button>
-            </form>
+            {/* Search + Table Card */}
+            <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
+                {/* Search bar */}
+                <div className="px-5 py-4 border-b border-gray-100 flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
+                    <form onSubmit={handleSearch} className="flex gap-2 w-full sm:max-w-sm">
+                        <div className="relative flex-1">
+                            <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                            <input
+                                type="text"
+                                value={search}
+                                onChange={(e) => setSearch(e.target.value)}
+                                placeholder="Cari nama, username, atau email..."
+                                className="w-full border border-gray-200 rounded-xl pl-9 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#30AFFF]"
+                            />
+                        </div>
+                        <button
+                            type="submit"
+                            className="text-white px-4 py-2 rounded-xl text-sm font-medium hover:opacity-90 transition-opacity"
+                            style={{ background: 'linear-gradient(135deg, #30AFFF, #CFECF3)' }}
+                        >
+                            Cari
+                        </button>
+                    </form>
+                    <div className="flex items-center gap-2 text-sm text-gray-400">
+                        <Users size={15} />
+                        <span>{users?.data?.length ?? 0} user</span>
+                    </div>
+                </div>
 
-            <div className="bg-white rounded-lg shadow overflow-hidden">
+                {/* Table */}
                 {loading ? (
-                    <div className="flex justify-center py-10">
-                        <Loader2 className="animate-spin text-blue-700" size={28} />
+                    <div className="flex justify-center py-14">
+                        <Loader2 className="animate-spin" size={28} style={{ color: '#30AFFF' }} />
                     </div>
                 ) : (
-                    <table className="w-full text-sm">
-                        <thead className="bg-gray-50 text-gray-600 text-left">
-                            <tr>
-                                <th className="px-4 py-3">Nama</th>
-                                <th className="px-4 py-3">Username</th>
-                                <th className="px-4 py-3">Email</th>
-                                <th className="px-4 py-3">Group</th>
-                                <th className="px-4 py-3">Status</th>
-                                <th className="px-4 py-3 text-right">Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {users?.data?.length === 0 && (
-                                <tr>
-                                    <td colSpan={6} className="text-center py-6 text-gray-400">
-                                        Tidak ada data user.
-                                    </td>
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-sm">
+                            <thead>
+                                <tr className="bg-gray-50 text-gray-500 text-xs uppercase tracking-wide">
+                                    <th className="px-5 py-3 text-left font-semibold">User</th>
+                                    <th className="px-5 py-3 text-left font-semibold">Username</th>
+                                    <th className="px-5 py-3 text-left font-semibold">Email</th>
+                                    <th className="px-5 py-3 text-left font-semibold">Group</th>
+                                    <th className="px-5 py-3 text-left font-semibold">Status</th>
+                                    <th className="px-5 py-3 text-right font-semibold">Aksi</th>
                                 </tr>
-                            )}
-                            {users?.data?.map((user) => (
-                                <tr key={user.id} className="border-t border-gray-100">
-                                    <td className="px-4 py-3">{user.name}</td>
-                                    <td className="px-4 py-3">{user.username}</td>
-                                    <td className="px-4 py-3">{user.email}</td>
-                                    <td className="px-4 py-3">{user.group?.name || '-'}</td>
-                                    <td className="px-4 py-3">
-                                        <span className={`px-2 py-1 rounded text-xs ${
-                                            user.is_active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'
-                                        }`}>
-                                            {user.is_active ? 'Aktif' : 'Nonaktif'}
-                                        </span>
-                                    </td>
-                                    <td className="px-4 py-3 text-right">
-                                        {hasPermission('user-management', 'can_edit') && (
-                                            <button
-                                                onClick={() => openEditModal(user)}
-                                                className="text-blue-600 hover:text-blue-800 mr-3"
-                                            >
-                                                <Pencil size={16} />
-                                            </button>
-                                        )}
-                                        {hasPermission('user-management', 'can_delete') && (
-                                            <button
-                                                onClick={() => handleDelete(user)}
-                                                className="text-red-600 hover:text-red-800"
-                                            >
-                                                <Trash2 size={16} />
-                                            </button>
-                                        )}
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody className="divide-y divide-gray-50">
+                                {users?.data?.length === 0 && (
+                                    <tr>
+                                        <td colSpan={6} className="text-center py-12 text-gray-400">
+                                            Tidak ada data user.
+                                        </td>
+                                    </tr>
+                                )}
+                                {users?.data?.map((user) => (
+                                    <tr key={user.id} className="hover:bg-gray-50 transition-colors">
+                                        {/* Nama dengan avatar */}
+                                        <td className="px-5 py-3.5">
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0"
+                                                    style={{ background: 'linear-gradient(135deg, #30AFFF, #CFECF3)' }}>
+                                                    {user.name?.charAt(0)?.toUpperCase()}
+                                                </div>
+                                                <span className="font-medium text-gray-800">{user.name}</span>
+                                            </div>
+                                        </td>
+                                        <td className="px-5 py-3.5 text-gray-500">{user.username}</td>
+                                        <td className="px-5 py-3.5 text-gray-500">{user.email}</td>
+                                        {/* Group badge */}
+                                        <td className="px-5 py-3.5">
+                                            {user.group?.name ? (
+                                                <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-blue-50 text-blue-600 border border-blue-100">
+                                                    {user.group.name}
+                                                </span>
+                                            ) : (
+                                                <span className="text-gray-400">-</span>
+                                            )}
+                                        </td>
+                                        {/* Status badge */}
+                                        <td className="px-5 py-3.5">
+                                            <span className={`inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full ${
+                                                user.is_active
+                                                    ? 'bg-emerald-50 text-emerald-600 border border-emerald-100'
+                                                    : 'bg-gray-100 text-gray-500 border border-gray-200'
+                                            }`}>
+                                                <span className={`w-1.5 h-1.5 rounded-full ${user.is_active ? 'bg-emerald-500' : 'bg-gray-400'}`} />
+                                                {user.is_active ? 'Aktif' : 'Nonaktif'}
+                                            </span>
+                                        </td>
+                                        {/* Aksi */}
+                                        <td className="px-5 py-3.5 text-right">
+                                            <div className="flex items-center justify-end gap-1">
+                                                {hasPermission('user-management', 'can_edit') && (
+                                                    <button
+                                                        onClick={() => openEditModal(user)}
+                                                        className="p-1.5 rounded-lg text-blue-500 hover:bg-blue-50 transition-colors"
+                                                        title="Edit"
+                                                    >
+                                                        <Pencil size={15} />
+                                                    </button>
+                                                )}
+                                                {hasPermission('user-management', 'can_delete') && (
+                                                    <button
+                                                        onClick={() => handleDelete(user)}
+                                                        className="p-1.5 rounded-lg text-red-400 hover:bg-red-50 transition-colors"
+                                                        title="Hapus"
+                                                    >
+                                                        <Trash2 size={15} />
+                                                    </button>
+                                                )}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
                 )}
             </div>
 
