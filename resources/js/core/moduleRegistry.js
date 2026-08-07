@@ -15,6 +15,7 @@ const moduleRegistry = {
     'audit-log': lazy(() => import('../modules/admin/audit-log/pages/AuditLogPage')),
     'project-management': lazy(() => import('../modules/project-management/pages/ProjectManagementPage')),
     'peserta-pkl': lazy(() => import('../modules/peserta-pkl/pages/PesertaPklPage')),
+    'task-assignment': lazy(() => import('../modules/task-assignment/pages/TaskAssignmentPage')),
 };
 
 export function getModuleComponent(moduleKey) {
