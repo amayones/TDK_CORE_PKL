@@ -9,6 +9,20 @@ use Symfony\Component\HttpFoundation\Response;
 class CheckMenuAccess
 {
     /**
+     * Menu admin yang selalu terlindungi — GROUP_ADMIN selalu punya akses penuh.
+     * Menu ini tidak bisa dikuburui karena penting untuk keamanan & manajemen sistem.
+     */
+    protected const PROTECTED_ADMIN_MENUS = [
+        'dashboard',
+        'user-management',
+        'group-management',
+        'menu-management',
+        'menu-access-management',
+        'system-setting',
+        'audit-log',
+    ];
+
+    /**
      * Contoh penggunaan di route:
      * ->middleware('menu.access:user-management,can_view')
      */
@@ -23,10 +37,13 @@ class CheckMenuAccess
             ], 401);
         }
 
-        if ($user->isAdmin()) {
+        // GROUP_ADMIN selalu punya akses penuh ke menu admin yang terlindungi
+        if ($user->isAdmin() && in_array($moduleKey, self::PROTECTED_ADMIN_MENUS)) {
             return $next($request);
         }
 
+        // Untuk semua user (termasuk admin untuk menu non-protected),
+        // cek berdasarkan record menu_access yang ada
         if (!$user->hasMenuAccess($moduleKey, $permission)) {
             return response()->json([
                 'success' => false,

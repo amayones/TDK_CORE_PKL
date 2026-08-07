@@ -35,10 +35,12 @@ class MenuAccessManagementController extends Controller
         $validated = $request->validate([
             'permissions'               => ['required', 'array'],
             'permissions.*.menu_id'     => ['required', 'exists:menus,id'],
+            'permissions.*.module_key'  => ['nullable', 'string'],
             'permissions.*.can_view'    => ['boolean'],
             'permissions.*.can_create'  => ['boolean'],
             'permissions.*.can_edit'    => ['boolean'],
             'permissions.*.can_delete'  => ['boolean'],
+            'permissions.*.locked'      => ['boolean'],
         ]);
 
         $this->service->saveMatrix($groupId, $validated['permissions']);

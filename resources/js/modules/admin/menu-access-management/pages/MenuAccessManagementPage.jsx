@@ -1,6 +1,16 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Loader2, Save, ShieldAlert } from 'lucide-react';
+import { Loader2, Save, Lock, ShieldAlert, Info } from 'lucide-react';
 import { fetchAccessGroups, fetchAccessMatrix, saveAccessMatrix } from '../services/menuAccessService';
+
+const PROTECTED_ADMIN_MENUS = [
+    'dashboard',
+    'user-management',
+    'group-management',
+    'menu-management',
+    'menu-access-management',
+    'system-setting',
+    'audit-log',
+];
 
 export default function MenuAccessManagementPage() {
     const [groups, setGroups] = useState([]);
@@ -13,8 +23,8 @@ export default function MenuAccessManagementPage() {
     useEffect(() => {
         fetchAccessGroups().then((data) => {
             setGroups(data);
-            const internGroup = data.find(g => g.code === 'GROUP_INTERN');
-            if (internGroup) setSelectedGroupId(internGroup.id);
+            const adminGroup = data.find(g => g.code === 'GROUP_ADMIN');
+            if (adminGroup) setSelectedGroupId(adminGroup.id);
         });
     }, []);
 
@@ -45,18 +55,35 @@ export default function MenuAccessManagementPage() {
     };
 
     const handleSave = async () => {
+        const confirmed = await window.__APP__.confirm({
+            type: 'warning',
+            title: 'Simpan Hak Akses',
+            message: `Simpan perubahan hak akses untuk group "${groupInfo?.name}"?`,
+            confirmText: 'Ya, Simpan',
+            cancelText: 'Batal'
+        });
+        if (!confirmed) return;
+
         setSaving(true);
         try {
             await saveAccessMatrix(selectedGroupId, matrix);
             window.__APP__.alert('Hak akses berhasil disimpan', 'success');
         } catch (err) {
-            window.__APP__.alert('Gagal menyimpan hak akses', 'error');
+            if (err.response?.status === 403) {
+                window.__APP__.alert('Anda tidak memiliki akses untuk mengubah hak akses ini', 'error');
+            } else {
+                window.__APP__.alert('Gagal menyimpan hak akses', 'error');
+            }
         } finally {
             setSaving(false);
         }
     };
 
     const isAdminGroup = groupInfo?.code === 'GROUP_ADMIN';
+
+    const isProtectedMenu = (item) => {
+        return isAdminGroup && PROTECTED_ADMIN_MENUS.includes(item.module_key);
+    };
 
     return (
         <div className="space-y-4">
@@ -75,15 +102,22 @@ export default function MenuAccessManagementPage() {
                     >
                         <option value="">-- Pilih Group --</option>
                         {groups.map((g) => (
-                            <option key={g.id} value={g.id}>{g.name}</option>
+                            <option key={g.id} value={g.id}>{g.name} ({g.code})</option>
                         ))}
                     </select>
                 </div>
 
                 {isAdminGroup && (
-                    <div className="flex items-center gap-2 bg-amber-50 text-amber-700 text-sm px-4 py-3 rounded">
-                        <ShieldAlert size={18} />
-                        Group Administrator selalu memiliki akses penuh ke seluruh menu dan tidak dapat diubah.
+                    <div className="flex items-start gap-3 bg-amber-50 text-amber-700 text-sm px-4 py-3 rounded">
+                        <Info size={18} className="mt-0.5 flex-shrink-0" />
+                        <div>
+                            <strong>Group Administrator</strong> selalu memiliki akses penuh (view, create, edit, delete)
+                            pada menu-menu admin berikut dan <strong>tidak dapat diubah</strong>:
+                            <div className="mt-1 font-medium">
+                                {PROTECTED_ADMIN_MENUS.join(', ')}
+                            </div>
+                            Menu lain (modul intern/non-admin) dapat dikelola untuk group ini.
+                        </div>
                     </div>
                 )}
 
@@ -105,41 +139,43 @@ export default function MenuAccessManagementPage() {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {matrix.map((item) => (
-                                        <tr key={item.menu_id} className="border-t border-gray-100">
-                                            <td className="px-4 py-3">
-                                                {item.parent_id && <span className="text-gray-300 mr-1">↳</span>}
-                                                {item.menu_name}
-                                            </td>
-                                            {['can_view', 'can_create', 'can_edit', 'can_delete'].map((field) => (
-                                                <td key={field} className="px-4 py-3 text-center">
-                                                    <input
-                                                        type="checkbox"
-                                                        checked={item[field]}
-                                                        onChange={() => togglePermission(item.menu_id, field)}
-                                                        disabled={isAdminGroup}
-                                                        className="w-4 h-4"
-                                                    />
+                                    {matrix.map((item) => {
+                                        const locked = item.locked || isProtectedMenu(item);
+                                        return (
+                                            <tr key={item.menu_id} className="border-t border-gray-100">
+                                                <td className="px-4 py-3 flex items-center gap-2">
+                                                    {item.parent_id && <span className="text-gray-300">↳</span>}
+                                                    {item.menu_name}
+                                                    {locked && <Lock size={14} className="text-gray-400" />}
                                                 </td>
-                                            ))}
-                                        </tr>
-                                    ))}
+                                                {['can_view', 'can_create', 'can_edit', 'can_delete'].map((field) => (
+                                                    <td key={field} className="px-4 py-3 text-center">
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={item[field]}
+                                                            onChange={() => togglePermission(item.menu_id, field)}
+                                                            disabled={locked}
+                                                            className="w-4 h-4"
+                                                        />
+                                                    </td>
+                                                ))}
+                                            </tr>
+                                        );
+                                    })}
                                 </tbody>
                             </table>
                         </div>
 
-                        {!isAdminGroup && (
-                            <div className="flex justify-end pt-2">
-                                <button
-                                    onClick={handleSave}
-                                    disabled={saving}
-                                    className="flex items-center gap-2 bg-blue-700 text-white px-4 py-2 rounded text-sm hover:bg-blue-800 disabled:opacity-50"
-                                >
-                                    <Save size={16} />
-                                    {saving ? 'Menyimpan...' : 'Simpan Hak Akses'}
-                                </button>
-                            </div>
-                        )}
+                        <div className="flex justify-end pt-2">
+                            <button
+                                onClick={handleSave}
+                                disabled={saving}
+                                className="flex items-center gap-2 bg-blue-700 text-white px-4 py-2 rounded text-sm hover:bg-blue-800 disabled:opacity-50"
+                            >
+                                <Save size={16} />
+                                {saving ? 'Menyimpan...' : 'Simpan Hak Akses'}
+                            </button>
+                        </div>
                     </>
                 )}
             </div>
