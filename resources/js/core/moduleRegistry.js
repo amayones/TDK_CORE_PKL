@@ -17,6 +17,7 @@ const moduleRegistry = {
     'peserta-pkl': lazy(() => import('../modules/peserta-pkl/pages/PesertaPklPage')),
     'task-assignment': lazy(() => import('../modules/task-assignment/pages/TaskAssignmentPage')),
     'attendance': lazy(() => import('../modules/attendance/pages/AttendancePage')),
+    'evaluation': lazy(() => import('../modules/evaluation/pages/EvaluationPage')),
 };
 
 export function getModuleComponent(moduleKey) {
