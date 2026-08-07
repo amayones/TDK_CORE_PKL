@@ -16,6 +16,7 @@ const moduleRegistry = {
     'project-management': lazy(() => import('../modules/project-management/pages/ProjectManagementPage')),
     'peserta-pkl': lazy(() => import('../modules/peserta-pkl/pages/PesertaPklPage')),
     'task-assignment': lazy(() => import('../modules/task-assignment/pages/TaskAssignmentPage')),
+    'attendance': lazy(() => import('../modules/attendance/pages/AttendancePage')),
 };
 
 export function getModuleComponent(moduleKey) {
