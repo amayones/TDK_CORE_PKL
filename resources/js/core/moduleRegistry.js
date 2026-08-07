@@ -19,6 +19,10 @@ const moduleRegistry = {
     'attendance': lazy(() => import('../modules/attendance/pages/AttendancePage')),
     'evaluation': lazy(() => import('../modules/evaluation/pages/EvaluationPage')),
     'certificate': lazy(() => import('../modules/certificate/pages/CertificatePage')),
+    'daily-logbook': lazy(() => import('../modules/daily-logbook/pages/DailyLogbookPage')),
+    'my-task': lazy(() => import('../modules/my-task/pages/MyTaskPage')),
+    'my-attendance': lazy(() => import('../modules/my-attendance/pages/MyAttendancePage')),
+    'my-profile': lazy(() => import('../modules/my-profile/pages/MyProfilePage')),
 };
 
 export function getModuleComponent(moduleKey) {
