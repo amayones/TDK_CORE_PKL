@@ -18,6 +18,7 @@ const moduleRegistry = {
     'task-assignment': lazy(() => import('../modules/task-assignment/pages/TaskAssignmentPage')),
     'attendance': lazy(() => import('../modules/attendance/pages/AttendancePage')),
     'evaluation': lazy(() => import('../modules/evaluation/pages/EvaluationPage')),
+    'certificate': lazy(() => import('../modules/certificate/pages/CertificatePage')),
 };
 
 export function getModuleComponent(moduleKey) {
